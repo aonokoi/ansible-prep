@@ -1,96 +1,97 @@
-# Preparing VMs for creating k8s cluster
-host: alma_servers
-become: yes
+  # Preparing VMs for creating k8s cluster
+- name: Prep for k8s
+  hosts: alma_servers
+  become: yes
 
-tasks:
-  
-  - name: ping alma_servers
-    ping:
-
-  - name: off the swap
-    ansible.builtin.shell: swapoff -a
-
-  - name: off selinux
-    ansible.builtin.command: setenforce 0
-
-  - name: off firewalld
-    ansible.builtin.shell: | 
-      systemctl stop firewalld &&
-      systemctl disable --now firewalld
-
-  - name: configuring kernel params
-    ansible.builtin.command: modprobe br_netfilter
-  
-  - name: making /etc/modules-load.d/modules-kubernetes.conf file
-    ansible.builtin.shell: echo "br_netfilter" > /etc/modules-load.d/modules-kubernetes.conf
-    args:
-      creates: /etc/modules-load.d/modules-kubernetes.conf
-
-  - name: configuring sysctl.conf
-    ansible.builtin.blockinfile:
-      path: /etc/sysctl.conf
-      block: |
-        net.ipv4.ip_forward=1
-        net.bridge.bridge-nf-call-iptables=1
-        net.ipv4.ip_nonlocal_bind=1
-
-  - name: adding k8s repo
-    ansible.builtin.shell: |
-      cat <<EOF | sudo tee /etc/yum.repos.d/kubernetes.repo
-      [kubernetes]
-      async = 1
-      enabled=1
-      baseurl = https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
-      gpgcheck = 1
-      gpgkey = https://packages.cloud.google.com/yum/doc/yum-key.gpg
-              https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
-      name = Base programs for k8s
-      EOF
-    args:
-      creates: /etc/yum.repos.d/kubernetes.repo
-      
-  - name: adding cri-o repo
-    ansible.builtin.shell: |
-      cat <<EOF | sudo tee /etc/yum.repos.d/cri-o.repo
-      [cri-o]
-      name=CRI-O
-      baseurl=https://k8s.io
-      enabled=1
-      gpgcheck=1
-      gpgkey=https://k8s.iorepodata/repomd.xml.key
-      EOF
-    args:
-      creates: /etc/yum.repos.d/cri-o.repo
+  tasks:
     
-  - name: installing  packages 
-    ansible.builtin.shell: |
-      dnf update -y &&
-      dnf install -y bash-completion python3 tar cri-o nfs-utils chrony kubectl kubelet kubeadm mc vim git rsyslog jq
+    - name: ping alma_servers
+      ping:
+
+    - name: off the swap
+      ansible.builtin.shell: swapoff -a
+
+    - name: off selinux
+      ansible.builtin.command: setenforce 0
+
+    - name: off firewalld
+      ansible.builtin.shell: | 
+        systemctl stop firewalld &&
+        systemctl disable --now firewalld
+
+    - name: configuring kernel params
+      ansible.builtin.command: modprobe br_netfilter
+    
+    - name: making /etc/modules-load.d/modules-kubernetes.conf file
+      ansible.builtin.shell: echo "br_netfilter" > /etc/modules-load.d/modules-kubernetes.conf
+      args:
+        creates: /etc/modules-load.d/modules-kubernetes.conf
+
+    - name: configuring sysctl.conf
+      ansible.builtin.blockinfile:
+        path: /etc/sysctl.conf
+        block: |
+          net.ipv4.ip_forward=1
+          net.bridge.bridge-nf-call-iptables=1
+          net.ipv4.ip_nonlocal_bind=1
+
+    - name: adding k8s repo
+      ansible.builtin.shell: |
+        cat <<EOF | sudo tee /etc/yum.repos.d/kubernetes.repo
+        [kubernetes]
+        async = 1
+        enabled=1
+        baseurl = https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
+        gpgcheck = 1
+        gpgkey = https://packages.cloud.google.com/yum/doc/yum-key.gpg
+                https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+        name = Base programs for k8s
+        EOF
+      args:
+        creates: /etc/yum.repos.d/kubernetes.repo
+        
+    - name: adding cri-o repo
+      ansible.builtin.shell: |
+        cat <<EOF | sudo tee /etc/yum.repos.d/cri-o.repo
+        [cri-o]
+        name=CRI-O
+        baseurl=https://k8s.io
+        enabled=1
+        gpgcheck=1
+        gpgkey=https://k8s.iorepodata/repomd.xml.key
+        EOF
+      args:
+        creates: /etc/yum.repos.d/cri-o.repo
+      
+    - name: installing  packages 
+      ansible.builtin.shell: |
+        dnf update -y &&
+        dnf install -y bash-completion python3 tar cri-o nfs-utils chrony kubectl kubelet kubeadm mc vim git rsyslog jq
 
 
-  - name: starting services
-    ansible.builtin.shell: |
-      systemctl enable chronyd &&
-      systemctl start chronyd &&
-      systemctl status chronyd &&
-      systemctl enable rsyslog &&
-      systemctl start rsyslog &&
-      systemctl status rsyslog &&
-      systemctl enable crio.service &&
-      systemctl start crio.service &&
-      systemctl status crio.service &&
+    - name: starting services
+      ansible.builtin.shell: |
+        systemctl enable chronyd &&
+        systemctl start chronyd &&
+        systemctl status chronyd &&
+        systemctl enable rsyslog &&
+        systemctl start rsyslog &&
+        systemctl status rsyslog &&
+        systemctl enable crio.service &&
+        systemctl start crio.service &&
+        systemctl status crio.service &&
 
 
-  - name: configuring /etc/crictl.yaml
-    ansible.builtin.shell: touch /etc/crictl.yaml
-    ansible.builtin.copy:
-      dest: /etc/crictl.yaml
-      content: |
-        runtime-endpoint: "unix:///run/containerd/containerd.sock"
-        image-endpoint: "unix:///run/containerd/containerd.sock"
-        timeout: 0
-        debug: false
-        pull-image-on-create: false
-        disable-pull-on-run: false
-    args:
-      creates: /etc/crictl.yaml
+    - name: configuring /etc/crictl.yaml
+      ansible.builtin.shell: touch /etc/crictl.yaml
+      ansible.builtin.copy:
+        dest: /etc/crictl.yaml
+        content: |
+          runtime-endpoint: "unix:///run/containerd/containerd.sock"
+          image-endpoint: "unix:///run/containerd/containerd.sock"
+          timeout: 0
+          debug: false
+          pull-image-on-create: false
+          disable-pull-on-run: false
+      args:
+        creates: /etc/crictl.yaml
