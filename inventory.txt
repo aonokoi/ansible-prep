@@ -1,6 +1,15 @@
-[staging_servers]
-neko	ansible_host=192.168.122.122	ansible_user=igor
-surikat	ansible_host=192.168.122.124	ansible_user=surikat
+[ubuntu_servers]
+neko2	ansible_host=192.168.0.102	ansible_user=neko2
 
+[alma_servers]
+alma	ansible_host=wn1.lab.com	ansible_user=alma
+alma2    ansible_host=wn2.lab.com      ansible_user=alma2
+alma3	ansible_host=wn3.lab.com      ansible_user=alma3
 
+[staging_servers:children]
+ubuntu_servers
+alma_servers
+
+[dnsNfs_servers]
+neko	ansible_host=192.168.0.103	ansible_user=neko
 

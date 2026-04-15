@@ -1,0 +1,36 @@
+---
+- name: Хост страницы "Красный круг"
+  hosts: staging_servers
+  become: yes
+
+  vars:
+    source_file: /home/igor/ansibleTraining/web.html
+    destination_file: /var/www/html/index.html
+
+  tasks:
+
+  - name: Ensure latest version of apache is installed
+    apt:
+      name: apache2
+      state: latest
+
+
+  - name: Copy the html page
+    copy:
+      src: "{{ source_file }}"
+      dest: "{{ destination_file }}"
+      mode: 0644
+    notify: Restart apache
+
+  - name: Ensure apache2.service is enabled
+    service:
+      name: apache2
+      state: started
+      enabled: yes
+
+  handlers:
+    - name: Restart apache
+      service:
+        name: apache2
+        state: restarted
+
