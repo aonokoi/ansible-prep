@@ -49,24 +49,11 @@
         EOF
       args:
         creates: /etc/yum.repos.d/kubernetes.repo
-        
-    - name: adding cri-o repo
-      ansible.builtin.shell: |
-        cat <<EOF | sudo tee /etc/yum.repos.d/cri-o.repo
-        [cri-o]
-        name=CRI-O
-        baseurl=https://k8s.io
-        enabled=1
-        gpgcheck=1
-        gpgkey=https://k8s.iorepodata/repomd.xml.key
-        EOF
-      args:
-        creates: /etc/yum.repos.d/cri-o.repo
       
     - name: installing  packages 
       ansible.builtin.shell: |
         dnf update -y &&
-        dnf install -y bash-completion python3 tar cri-o nfs-utils chrony kubectl kubelet kubeadm mc vim git rsyslog jq
+        dnf install -y bash-completion python3 tar containerd nfs-utils chrony kubectl kubelet kubeadm mc vim git rsyslog jq
 
 
     - name: starting services
@@ -77,13 +64,15 @@
         systemctl enable rsyslog &&
         systemctl start rsyslog &&
         systemctl status rsyslog &&
-        systemctl enable crio.service &&
-        systemctl start crio.service &&
-        systemctl status crio.service &&
+        systemctl enable containerd &&
+        systemctl start containerd &&
+        systemctl status containerd &&
 
+    - name: creating /etc/crictl.yaml
+      ansible.builtin.command: touch /etc/crictl.yaml
+        
 
     - name: configuring /etc/crictl.yaml
-      ansible.builtin.shell: touch /etc/crictl.yaml
       ansible.builtin.copy:
         dest: /etc/crictl.yaml
         content: |
