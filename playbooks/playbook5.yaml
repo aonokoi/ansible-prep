@@ -5,7 +5,7 @@
   
   - name: Ensure nfs client package is installed
     ansible.builtin.apk:
-      name: nfs-common
+      name: nfs-utils
       state: latest
 
   - name: create directory for share if not created
@@ -17,7 +17,7 @@
   - name: confugure nfs client
     ansible.builtin.lineinfile:
       path: /etc/fstab
-      line: ns1.gin.lab:/data/nfs  /mnt/nfs-data  nfs
+      line: ns1.gin.com:/data/nfs   /mnt/nfs-data   nfs4    rw,_netdev 0 0
       state: present
     notify:
       - Restart nfs
@@ -25,5 +25,6 @@
   handlers:
   - name: Restart nfs
     ansible.builtin.service:
-      name: nfsd
+      name: nfs
+      enabled: true
       state: restarted
