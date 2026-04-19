@@ -1,0 +1,5 @@
+- name: Configure fresh alpine VMs
+  hosts: alpine_servers
+  roles:
+    - configure_dns
+    - attach_nfs_vm

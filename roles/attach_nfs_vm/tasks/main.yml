@@ -1,0 +1,24 @@
+#SPDX-License-Identifier: MIT-0
+---
+# tasks file for attach_nfs_vm
+
+- name: Update apk packages and install nfs-utils
+  ansible.builtin.apk:
+    name: nfs-utils
+    state: latest
+    update_cache: true
+
+- name: Create directory for share if not created
+  ansible.builtin.file:
+    path: /mnt/nfs-data
+    state: directory
+    mode: '0755'
+
+- name: Configure nfs client
+  ansible.builtin.lineinfile:
+    path: /etc/fstab
+    line: ns1.gin.com:/data/nfs   /mnt/nfs-data   nfs4    rw,_netdev 0 0
+    state: present
+  notify:
+    - Restart nfs
+

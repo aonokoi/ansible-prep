@@ -1,0 +1,14 @@
+#SPDX-License-Identifier: MIT-0
+---
+# tasks file for configure_dns
+
+- name: Change /etc/udhcpc/udhcpc.conf
+  ansible.builtin.lineinfile:
+    path: /etc/udhcpc/udhcpc.conf
+    line: RESOLV_CONF="no"
+    state: present
+
+- name: Restart networking
+  ansible.builtin.service:
+    name: networking
+    state: restarted
