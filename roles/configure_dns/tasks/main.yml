@@ -8,6 +8,12 @@
     line: RESOLV_CONF="no"
     state: present
 
+- name: Add nameserver to /etc/resolv.conf
+  ansible.builtin.lineinfile:
+    path: /etc/resolv.conf
+    line: nameserver 192.168.0.190
+    state: present
+
 - name: Restart networking
   ansible.builtin.service:
     name: networking

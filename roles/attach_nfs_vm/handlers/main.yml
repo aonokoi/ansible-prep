@@ -2,8 +2,3 @@
 ---
 # handlers file for attach_nfs_vm
 
-- name: Restart nfs
-  ansible.builtin.service:
-    name: nfs
-    enabled: true
-    state: restarted

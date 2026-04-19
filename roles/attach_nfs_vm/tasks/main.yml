@@ -19,6 +19,10 @@
     path: /etc/fstab
     line: ns1.gin.com:/data/nfs   /mnt/nfs-data   nfs4    rw,_netdev 0 0
     state: present
-  notify:
-    - Restart nfs
+
+- name: Restart nfs service
+  ansible.builtin.service:
+    name: nfsmount
+    enabled: true
+    state: started
 

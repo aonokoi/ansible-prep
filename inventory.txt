@@ -1,5 +1,8 @@
-[alpine_servers]
+[staging_servers]
 alpine1 ansible_host=192.168.0.180  ansible_user=root
+
+[alpine_servers]
+alp2  ansible_host=192.168.0.184  ansible_user=root
 
 [dnsNfs_servers]
 deb-dns	ansible_host=192.168.0.190	ansible_user=root
