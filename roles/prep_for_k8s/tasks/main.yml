@@ -1,0 +1,73 @@
+#SPDX-License-Identifier: MIT-0
+---
+# tasks file for prep_for_k8s
+
+
+- name: Ensure servers are alive
+  ansible.builtin.ping:
+
+- name: Comment out swap entry in fstab
+  ansible.builtin.replace:
+    path: /etc/fstab
+    regexp: '^([^#].*?\sswap\s+.*)$'
+    replace: '# \1'
+    backup: true
+
+- name: Download br_netfilter
+  community.general.modprobe:
+    name: br_netfilter
+    state: present
+
+- name: Create k8s config file in modules-load.d
+  ansible.builtin.copy:
+    src: modules-kubernetes.conf
+    dest: /etc/modules-load.d/modules-kubernetes.conf
+    mode: '644'
+
+- name: Add repos
+  ansible.builtin.copy:
+    src: repos
+    dest: /etc/apk/repositories
+    force: true
+
+- name: Add required packages
+  ansible.builtin.apk:
+    name:
+      - bash-completion
+      - python3
+      - tar
+      - containerd
+      - chrony
+      - kubectl
+      - kubelet
+      - kubeadm
+      - mc
+      - vim
+      - git
+      - rsyslog
+      - jq
+    state: present
+  
+- name: Replace crictl config
+  ansible.builtin.copy:
+    src: crictl.yaml
+    dest: /etc/crictl.yaml
+    force: true
+
+- name: Enable NTP service
+  ansible.builtin.service:
+    name: chronyd
+    state: started
+    enabled: true
+
+- name: Enable syslog
+  ansible.builtin.service:
+    name: rsyslog
+    state: started
+    enabled: true
+
+- name: Enable containerd
+  ansible.builtin.service:
+    name: containerd
+    state: started
+    enabled: true

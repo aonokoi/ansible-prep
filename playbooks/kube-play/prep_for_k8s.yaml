@@ -1,0 +1,7 @@
+- name: Prepare alpine VMs for kubeadm
+  hosts: alpine_servers
+  roles:
+    - configure_dns
+    - attach_nfs_vm
+    - iptables_add
+    - prep_for_k8s

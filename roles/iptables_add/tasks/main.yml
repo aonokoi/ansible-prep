@@ -1,0 +1,12 @@
+#SPDX-License-Identifier: MIT-0
+---
+# tasks file for iptables_add
+
+- name: Ensure host is alive
+  ansible.builtin.ping:
+
+- name: Update repos and download iptables
+  ansible.builtin.apk:
+    name: iptables
+    state: latest
+    update_cache: true
