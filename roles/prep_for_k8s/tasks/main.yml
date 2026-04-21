@@ -11,7 +11,7 @@
     path: /etc/fstab
     regexp: '^([^#].*?\sswap\s+.*)$'
     replace: '# \1'
-    backup: true
+    backup: false
 
 - name: Download br_netfilter
   community.general.modprobe:
@@ -23,6 +23,12 @@
     src: modules-kubernetes.conf
     dest: /etc/modules-load.d/modules-kubernetes.conf
     mode: '644'
+
+- name: Configure sysctl.conf
+  ansible.builtin.copy:
+    src: local.conf
+    dest: /etc/sysctl.d/local.conf
+    mode: '644'    
 
 - name: Add repos
   ansible.builtin.copy:
