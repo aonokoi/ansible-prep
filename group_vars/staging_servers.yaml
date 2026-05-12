@@ -1,2 +1,0 @@
-ansible_ssh_private_key_file : /home/igor/.ssh/neko_id_rsa
-ansible_become_password      : 123

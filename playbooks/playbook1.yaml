@@ -1,7 +1,0 @@
-- name: Test connection to servers
-  hosts: staging_servers 
-  become: true
-
-  tasks:
-  - name: ping staging servers
-    ping:
